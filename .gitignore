@@ -3,6 +3,9 @@
 *.key
 *.pem
 
+# Firebase Configuration (Contains API keys - DO NOT commit)
+firebase-config.js
+
 # Python cache
 __pycache__/
 *.py[cod]

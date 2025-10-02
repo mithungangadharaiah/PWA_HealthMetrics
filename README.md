@@ -12,12 +12,19 @@ A Progressive Web App for comprehensive health monitoring using device sensors a
 - 🫁 **Blood Oxygen** - Camera-based SpO2 estimation
 - 🩺 **Blood Pressure** - Estimated from heart rate data
 
+### Authentication & Analytics
+- 🔐 **Google Sign-In** - Secure OAuth 2.0 authentication
+- 👥 **User Tracking** - Track who uses your app (with consent)
+- 📊 **Admin Dashboard** - View user statistics and analytics
+- 🔒 **Privacy Compliant** - GDPR & CCPA compliant data handling
+- 💾 **Cloud Storage** - Firebase Firestore for data persistence
+
 ### Smart Features
 - ⏱️ **60-Second Sampling** - Automated testing with progress tracking
 - 📊 **Health Reports** - Persistent data storage and analysis
 - 🤖 **AI Health Analysis** - Intelligent insights (coming soon)
 - 📱 **PWA Support** - Install on any device, works offline
-- 🔐 **Privacy First** - All processing happens on device
+- 🌍 **Cross-Platform** - Works on iOS, Android, and Desktop
 
 ### iOS Compatibility
 - ✅ iPhone/iPad support via HTTPS
@@ -26,6 +33,24 @@ A Progressive Web App for comprehensive health monitoring using device sensors a
 - 🔦 Flashlight control for better readings
 
 ## 🚀 Quick Start
+
+### 🔥 Firebase Setup (First-Time Only)
+
+**For authentication and user tracking:**
+
+1. **Follow the beginner-friendly guide**: See `FIREBASE_SETUP.md`
+2. **Time required**: 15-20 minutes
+3. **Cost**: FREE for first 10,000 users/month
+
+Quick steps:
+```bash
+# 1. Create Firebase project at https://console.firebase.google.com/
+# 2. Enable Google Authentication
+# 3. Create Firestore database
+# 4. Copy your config to firebase-config.js
+```
+
+Detailed instructions in: **[FIREBASE_SETUP.md](FIREBASE_SETUP.md)** ← Click here!
 
 ### For iPhone Users (Recommended)
 
@@ -38,13 +63,23 @@ A Progressive Web App for comprehensive health monitoring using device sensors a
    - Open Safari (Chrome also supported)
    - Navigate to: `https://YOUR-PC-IP:8443/HealthMetrics.html`
    - Accept the self-signed certificate warning
+   - **Sign in with Google** (new!)
    - Grant camera permissions
 
 3. **Add to Home Screen** for full PWA experience
 
 ### For Desktop/Android
 
-Simply open `HealthMetrics.html` in any modern browser.
+1. Open `HealthMetrics.html` in any modern browser
+2. **Sign in with Google**
+3. Start monitoring!
+
+### Admin Dashboard
+
+Access user analytics:
+1. Open `admin-dashboard.html`
+2. Sign in with your admin email (configured in `firebase-config.js`)
+3. View user statistics, test results, and usage patterns
 
 ## 📱 Usage Instructions
 
@@ -78,8 +113,11 @@ All controls in one place:
 
 - **Frontend**: Pure HTML5, CSS3, JavaScript (no frameworks)
 - **APIs**: Camera API, MediaStream, Sensor APIs, Service Workers
+- **Authentication**: Firebase Auth with Google OAuth 2.0
+- **Database**: Firebase Firestore (NoSQL cloud database)
 - **Backend**: Python HTTPS server with SSL
-- **Storage**: LocalStorage for persistence
+- **Storage**: LocalStorage + Firestore for persistence
+- **Security**: HTTPS, OAuth 2.0 with PKCE, Firestore security rules
 - **AI**: Integration ready for health insights
 
 ## 📂 Project Structure
@@ -87,9 +125,16 @@ All controls in one place:
 ```
 BluetoothDashboard/
 ├── HealthMetrics.html          # Main PWA application
+├── admin-dashboard.html        # Admin analytics dashboard (NEW!)
+├── privacy-policy.html         # Privacy policy & GDPR compliance (NEW!)
 ├── manifest.json               # PWA manifest
 ├── sw.js                       # Service Worker
+├── firebase-config.js          # Firebase configuration (excluded from git)
+├── firebase-config.template.js # Template for Firebase config (NEW!)
+├── firebase-auth.js            # Authentication module (NEW!)
+├── firebase-analytics.js       # Analytics tracking module (NEW!)
 ├── start-https-server.py       # HTTPS server for iOS
+├── FIREBASE_SETUP.md           # Beginner-friendly Firebase guide (NEW!)
 ├── FINGER_PLACEMENT_GUIDE.md   # Sensor usage guide
 ├── IPHONE_SETUP.md            # iOS setup instructions
 ├── REAL_SENSORS_ANALYSIS.md   # Technical analysis
@@ -98,11 +143,16 @@ BluetoothDashboard/
 
 ## 🔒 Security & Privacy
 
-- ✅ No data leaves your device
-- ✅ SSL certificates auto-generated locally
-- ✅ No external API calls (except AI feature when enabled)
-- ✅ Camera stream stays on-device
-- ✅ No tracking or analytics
+- ✅ **Google OAuth 2.0** - Industry-standard authentication
+- ✅ **Encrypted data** - HTTPS + Firebase encryption at rest
+- ✅ **GDPR Compliant** - User consent, right to delete, data export
+- ✅ **Privacy Policy** - Full transparency on data usage
+- ✅ **No data selling** - Your data is never sold to third parties
+- ✅ **On-device processing** - Health calculations happen locally
+- ✅ **Secure database** - Firestore security rules protect user data
+- ✅ **Admin access control** - Email whitelist for dashboard access
+
+**Privacy Policy**: See `privacy-policy.html` for full details
 
 ## 🚧 Roadmap
 
@@ -113,14 +163,21 @@ BluetoothDashboard/
 - [x] 60-second sampling
 - [x] Persistent reports
 
-### Phase 2 - AI Integration (🔄 In Progress)
+### Phase 2 - Authentication & Analytics (✅ Complete)
+- [x] Google Sign-In integration
+- [x] User tracking with consent
+- [x] Admin dashboard
+- [x] Firebase Firestore database
+- [x] Privacy policy & GDPR compliance
+
+### Phase 3 - AI Integration (🔄 In Progress)
 - [ ] AI health analysis endpoint
 - [ ] Personalized recommendations
 - [ ] Anomaly detection
 - [ ] Historical trend analysis
 
-### Phase 3 - Commercialization (📋 Planned)
-- [ ] User accounts & cloud sync
+### Phase 4 - Commercialization (📋 Planned)
+- [ ] Cloud sync across devices
 - [ ] Premium features
 - [ ] Integration with health platforms
 - [ ] API for third-party apps
