@@ -1,4 +1,4 @@
-// 🔥 Firebase Configuration TEMPLATE
+// Firebase Configuration TEMPLATE
 // ========================================
 // THIS IS A TEMPLATE FILE FOR GITHUB
 // Copy this to firebase-config.js and replace with YOUR Firebase project details
@@ -12,12 +12,12 @@ const firebaseConfig = {
     appId: "YOUR_APP_ID"                      
 };
 
-// 🔧 Admin Configuration
+//Admin Configuration
 const ADMIN_EMAILS = [
     "your-email@gmail.com"  // Replace with YOUR email address
 ];
 
-// 📊 Analytics Configuration
+// Analytics Configuration
 const ANALYTICS_ENABLED = true;  
 
 // Export configuration
