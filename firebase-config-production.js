@@ -19,9 +19,18 @@ const ADMIN_EMAILS = [
 // Analytics Configuration
 const ANALYTICS_ENABLED = true;
 
+// Google Gemini AI Configuration
+const GEMINI_API_KEY = 'AIzaSyC34bRrVdXL9Y8Mw7_n8f4HSduUrmfNWOU';
+const GEMINI_MODEL = 'gemini-2.5-flash';
+const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
+
 // Export configuration
 window.FIREBASE_CONFIG = firebaseConfig;
 window.ADMIN_EMAILS = ADMIN_EMAILS;
 window.ANALYTICS_ENABLED = ANALYTICS_ENABLED;
+window.GEMINI_API_KEY = GEMINI_API_KEY;
+window.GEMINI_MODEL = GEMINI_MODEL;
+window.GEMINI_URL = GEMINI_URL;
 
 console.log("Firebase production config loaded successfully");
+console.log("Google Gemini AI enabled for production");
