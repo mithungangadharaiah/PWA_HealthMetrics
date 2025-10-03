@@ -114,7 +114,19 @@ function handleUserSignedIn(user) {
         if (userEmail) userEmail.textContent = user.email;
         if (userName) userName.textContent = user.displayName || 'User';
     }
-    if (mainContent) mainContent.style.display = 'block';
+    if (mainContent) {
+        mainContent.style.display = 'block';
+        
+        // Initialize camera AFTER main-content is visible
+        if (typeof initCamera === 'function') {
+            console.log('[INIT] Initializing camera after sign-in...');
+            setTimeout(() => {
+                initCamera();
+            }, 500); // Small delay to ensure DOM is ready
+        } else {
+            console.warn('[WARNING] initCamera function not found');
+        }
+    }
 }
 
 // Handle user signed out
