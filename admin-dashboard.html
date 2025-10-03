@@ -154,6 +154,29 @@
                 <div class="stat-label">📅 Tests Today</div>
                 <div class="stat-value" id="tests-today">0</div>
             </div>
+            <div class="stat-card">
+                <div class="stat-label">🤖 AI Requests</div>
+                <div class="stat-value" id="ai-requests">0</div>
+            </div>
+        </div>
+
+        <!-- AI Access Requests -->
+        <div class="data-table">
+            <h3>🤖 AI Access Requests (Pending Approval)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Email</th>
+                        <th>Name</th>
+                        <th>Requested</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="ai-requests-table">
+                    <tr><td colspan="5" style="text-align: center;">Loading...</td></tr>
+                </tbody>
+            </table>
         </div>
 
         <!-- Recent Users Table -->
@@ -164,13 +187,15 @@
                     <tr>
                         <th>Email</th>
                         <th>Name</th>
+                        <th>AI Access</th>
                         <th>Total Tests</th>
                         <th>Total Sessions</th>
                         <th>Last Login</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody id="users-table">
-                    <tr><td colspan="5" style="text-align: center;">Loading...</td></tr>
+                    <tr><td colspan="7" style="text-align: center;">Loading...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -288,6 +313,10 @@
                 const sessionsSnapshot = await db.collection('healthSessions').orderBy('timestamp', 'desc').limit(50).get();
                 const sessions = sessionsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
+                // Get AI access requests
+                const aiRequestsSnapshot = await db.collection('aiAccessRequests').where('status', '==', 'pending').get();
+                const aiRequests = aiRequestsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
                 // Calculate statistics
                 const totalUsers = users.length;
                 const today = new Date();
@@ -311,6 +340,26 @@
                 document.getElementById('active-users').textContent = activeToday;
                 document.getElementById('total-tests').textContent = totalTests;
                 document.getElementById('tests-today').textContent = testsToday;
+                document.getElementById('ai-requests').textContent = aiRequests.length;
+
+                // Update AI requests table
+                const aiRequestsTable = document.getElementById('ai-requests-table');
+                if (aiRequests.length === 0) {
+                    aiRequestsTable.innerHTML = '<tr><td colspan="5" style="text-align: center; opacity: 0.6;">No pending requests</td></tr>';
+                } else {
+                    aiRequestsTable.innerHTML = aiRequests.map(request => `
+                        <tr>
+                            <td>${request.userEmail || 'N/A'}</td>
+                            <td>${request.userName || 'Anonymous'}</td>
+                            <td>${request.requestedAt ? request.requestedAt.toDate().toLocaleString() : 'N/A'}</td>
+                            <td><span style="background: rgba(255,200,0,0.3); padding: 5px 10px; border-radius: 10px;">⏳ Pending</span></td>
+                            <td>
+                                <button onclick="approveAIAccess('${request.id}', '${request.userId}')" style="background: rgba(0,255,100,0.3); padding: 5px 15px; margin: 2px;">✅ Approve</button>
+                                <button onclick="denyAIAccess('${request.id}', '${request.userId}')" style="background: rgba(255,100,100,0.3); padding: 5px 15px; margin: 2px;">❌ Deny</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
 
                 // Update users table
                 const usersTable = document.getElementById('users-table');
@@ -318,9 +367,16 @@
                     <tr>
                         <td>${user.email || 'N/A'}</td>
                         <td>${user.displayName || 'Anonymous'}</td>
+                        <td>${user.aiEnabled ? '<span style="color: #00ff88;">✅ Enabled</span>' : '<span style="opacity: 0.5;">❌ Disabled</span>'}</td>
                         <td>${user.totalTests || 0}</td>
                         <td>${user.totalSessions || 0}</td>
                         <td>${user.lastLogin ? user.lastLogin.toDate().toLocaleString() : 'Never'}</td>
+                        <td>
+                            ${!user.aiEnabled ? 
+                                `<button onclick="toggleAIAccess('${user.id}', true)" style="background: rgba(0,255,100,0.3); padding: 5px 15px;">Enable AI</button>` : 
+                                `<button onclick="toggleAIAccess('${user.id}', false)" style="background: rgba(255,100,100,0.3); padding: 5px 15px;">Disable AI</button>`
+                            }
+                        </td>
                     </tr>
                 `).join('');
 
@@ -350,6 +406,86 @@
         async function refreshData() {
             await loadDashboardData();
         }
+
+        // Approve AI access request
+        async function approveAIAccess(requestId, userId) {
+            try {
+                if (!confirm('Approve AI access for this user?')) return;
+
+                showMessage('Processing approval...', 'loading');
+
+                // Update user's aiEnabled field
+                await db.collection('users').doc(userId).update({
+                    aiEnabled: true,
+                    aiEnabledAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                // Update request status
+                await db.collection('aiAccessRequests').doc(requestId).update({
+                    status: 'approved',
+                    approvedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    approvedBy: currentUser.email
+                });
+
+                showMessage('✅ AI access approved!', 'success');
+                setTimeout(() => loadDashboardData(), 1500);
+
+            } catch (error) {
+                console.error('Error approving AI access:', error);
+                showMessage('❌ Error: ' + error.message, 'error');
+            }
+        }
+
+        // Deny AI access request
+        async function denyAIAccess(requestId, userId) {
+            try {
+                if (!confirm('Deny AI access for this user?')) return;
+
+                showMessage('Processing denial...', 'loading');
+
+                // Update request status
+                await db.collection('aiAccessRequests').doc(requestId).update({
+                    status: 'denied',
+                    deniedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    deniedBy: currentUser.email
+                });
+
+                showMessage('AI access denied', 'success');
+                setTimeout(() => loadDashboardData(), 1500);
+
+            } catch (error) {
+                console.error('Error denying AI access:', error);
+                showMessage('❌ Error: ' + error.message, 'error');
+            }
+        }
+
+        // Toggle AI access for existing user
+        async function toggleAIAccess(userId, enable) {
+            try {
+                const action = enable ? 'enable' : 'disable';
+                if (!confirm(`Are you sure you want to ${action} AI access for this user?`)) return;
+
+                showMessage(`${enable ? 'Enabling' : 'Disabling'} AI access...`, 'loading');
+
+                await db.collection('users').doc(userId).update({
+                    aiEnabled: enable,
+                    aiModifiedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    aiModifiedBy: currentUser.email
+                });
+
+                showMessage(`✅ AI access ${enable ? 'enabled' : 'disabled'}`, 'success');
+                setTimeout(() => loadDashboardData(), 1500);
+
+            } catch (error) {
+                console.error('Error toggling AI access:', error);
+                showMessage('❌ Error: ' + error.message, 'error');
+            }
+        }
+
+        // Make functions globally accessible
+        window.approveAIAccess = approveAIAccess;
+        window.denyAIAccess = denyAIAccess;
+        window.toggleAIAccess = toggleAIAccess;
 
         // Show message
         function showMessage(text, type) {

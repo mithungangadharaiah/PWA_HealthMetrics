@@ -1,0 +1,60 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function to check if user is admin
+    function isAdmin() {
+      return request.auth != null && request.auth.token.email == 'mithunglares@gmail.com';
+    }
+    
+    // Users collection
+    match /users/{userId} {
+      // Users can read their own data
+      allow read: if request.auth != null && request.auth.uid == userId;
+      
+      // Users can create their own document on first sign-in
+      allow create: if request.auth != null && request.auth.uid == userId;
+      
+      // Users can update their own data (except AI permission fields)
+      allow update: if request.auth != null 
+                    && request.auth.uid == userId
+                    && !request.resource.data.diff(resource.data).affectedKeys()
+                       .hasAny(['aiEnabled', 'aiEnabledAt', 'aiModifiedAt', 'aiModifiedBy']);
+      
+      // Admins can do anything
+      allow read, write: if isAdmin();
+    }
+    
+    // AI Access Requests collection
+    match /aiAccessRequests/{requestId} {
+      // Users can read their own requests
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      
+      // Users can create their own requests (but only once)
+      allow create: if request.auth != null 
+                    && request.resource.data.userId == request.auth.uid
+                    && request.resource.data.userEmail == request.auth.token.email
+                    && request.resource.data.status == 'pending';
+      
+      // Admins can read and update all requests
+      allow read, update: if isAdmin();
+    }
+    
+    // Health Sessions collection
+    match /healthSessions/{sessionId} {
+      // Users can create and read their own sessions
+      allow create: if request.auth != null 
+                    && request.resource.data.userId == request.auth.uid;
+      
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      
+      // Admins can read all sessions
+      allow read: if isAdmin();
+    }
+    
+    // Default deny all other collections
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
